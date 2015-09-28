@@ -32,6 +32,11 @@ book GetBook() {
 
 	cout << "Введите имя автора: ";
 	cin.getline(x.author, 40);
+	
+	if (strcmp(x.author,"")==0){
+		return x;
+	}
+
 	cout << "Введите название книги: ";
 	cin.getline(x.title, 40);
 	cout << "Введите год издния: ";
@@ -358,15 +363,21 @@ book *InputFromFile(book *lib, int &size) {
 
 book *menu_1(book *lib, int &size) {
 
-	lib = AddBook(lib, size);
-
+	int n = 1;
+	while (n) {
+		lib = AddBook(lib, size);
+		if (strcmp(lib[size-1].author,"")==0) {
+			lib = DelBook(lib, size, size - 1);
+			return lib;
+		}
+	}
 	return lib;
 }
 
 book *menu_2(book *lib, int &size) {
-
+	system("cls");
 	lib = InputFromFile(lib, size);
-
+		
 	return lib;
 }
 
@@ -374,22 +385,22 @@ book *menu(book *lib, int &size) {
 	char response[10];
 	cout << "1) Создать библиотеку." << endl;
 	cout << "2) Загрузить библиотеку. " << endl;
+	cout << "3) Выход." << endl;
 
 	int n = 1;
 	while (n) {
-
-
 
 		cin.ignore(cin.rdbuf()->in_avail());
 		cin >> response;
 
 		if (strcmp(response, "1") == 0) {
 			lib = menu_1(lib, size);
+			break;
 		}
 		if (strcmp(response, "2") == 0) {
 			lib = menu_2(lib, size);
 		}
-		if (strcmp(response, "exit") == 0) {
+		if (strcmp(response, "3") == 0) {
 			cout << "Программа завершена." << endl;
 			return 0;
 		}

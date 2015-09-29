@@ -1,4 +1,3 @@
-#define _CRT_SECURE_NO_WARNINGS
 #include <iostream>
 #include <iomanip>
 #include <windows.h>
@@ -69,6 +68,11 @@ book *AddBook(book *lib, int &size) {
 }
 
 book *DelBook(book *lib, int &size, int ncell) {
+
+	if (size == 1) {
+		--size;
+		return NULL;
+	}
 
 	book* temp = new book[size - 1];
 
@@ -216,6 +220,7 @@ void ShowLib(book *lib, int size) {
 		cout << setw(16) << left << "Кол-во страниц: " << setw(40) << left << lib[i].pages << endl;
 		cout << "-------------------------------------------------------------------" << endl;
 	}
+	_getch();
 }
 
 void Search(book *lib, int size) {
@@ -256,6 +261,18 @@ void SortLibByYear(book *lib, int size) {
 	for (int j = size - 1; j > 0; j--) {
 		for (int i = 0; i < j; i++) {
 			if (lib[i].year > lib[i + 1].year) {
+				book temp = lib[i];
+				lib[i] = lib[i + 1];
+				lib[i + 1] = temp;
+			}
+		}
+	}
+}
+
+void SortLibByPages(book *lib, int size) {
+	for (int j = size - 1; j > 0; j--) {
+		for (int i = 0; i < j; i++) {
+			if (lib[i].pages > lib[i + 1].pages) {
 				book temp = lib[i];
 				lib[i] = lib[i + 1];
 				lib[i + 1] = temp;
@@ -315,10 +332,6 @@ book *InputFromFile(book *lib, int &size) {
 
 	char dir[60];
 	ifstream fin;
-
-	cout << "***Загрузка библиотеки***" << endl;
-	cout << "Все не сохраненные данные будут потерянны." << endl;
-	cout << "--------------------------------------------------" << endl;
 	cout << "Ввидите путь: ";
 
 
@@ -330,12 +343,24 @@ book *InputFromFile(book *lib, int &size) {
 		fin.open(dir);
 		if (!fin.is_open()) {
 			cout << "Неверная директория." << endl;
+			cout << "Повторить ввод? (y/n)" << endl;
+			char x;
+			cin >> x;
+
+			switch (x) {
+			case('y' || 'Y') :
+			{
 			continue;
+			}
+			default: {
+				system("cls");	
+				return lib;
+			}
+			}
 		}
 		n = 0;
 	}
 
-	char buf[40];
 	size = 0;
 
 	while (!fin.eof()) {
@@ -358,35 +383,26 @@ book *InputFromFile(book *lib, int &size) {
 	return lib;
 }
 
-
-
-
-book *menu_1(book *lib, int &size) {
-
-	int n = 1;
-	while (n) {
-		lib = AddBook(lib, size);
-		if (strcmp(lib[size-1].author,"")==0) {
-			lib = DelBook(lib, size, size - 1);
-			return lib;
-		}
-	}
-	return lib;
-}
-
-book *menu_2(book *lib, int &size) {
+book *load(book *lib, int &size) {
 	system("cls");
+	cout << "                   Загрузка." << endl;
+	cout << "--------------------------------------------------" << endl;
+	cout << "ВНИМАНИЕ! Все не сохраненные данные будут утеряны." << endl;
+	cout << "--------------------------------------------------" << endl;
 	lib = InputFromFile(lib, size);
-		
 	return lib;
 }
 
-book *menu(book *lib, int &size) {
-	char response[10];
-	cout << "1) Создать библиотеку." << endl;
-	cout << "2) Загрузить библиотеку. " << endl;
-	cout << "3) Выход." << endl;
+void menu_sort(book *lib, int size) {
+	system("cls");
+	cout << "           Сортировка." << endl;
+	cout << "-----------------------------------" << endl;
+	cout << "1) По автору." << endl;
+	cout << "2) По называнию книги." << endl;
+	cout << "3) По дате издания." << endl;
+	cout << "4) По кол-ву страниц." << endl;
 
+	char response[10];
 	int n = 1;
 	while (n) {
 
@@ -394,31 +410,151 @@ book *menu(book *lib, int &size) {
 		cin >> response;
 
 		if (strcmp(response, "1") == 0) {
-			lib = menu_1(lib, size);
+			SortLibByAuthor(lib, size);
 			break;
 		}
 		if (strcmp(response, "2") == 0) {
-			lib = menu_2(lib, size);
+			SortLibByTitle(lib, size);
+			break;
+		}
+		if (strcmp(response, "3") == 0) {
+			SortLibByYear(lib, size);
+			break;
+		}
+		if (strcmp(response, "4") == 0) {
+			SortLibByPages(lib, size);
+		}
+		system("cls");
+	}
+	cout << "           Сортировка." << endl;
+	cout << "-----------------------------------" << endl;
+	cout << "Сортировка завершена." << endl;
+	cout << "Вывести библиотеку на экран? (y/n)" << endl;
+	char x;
+	cin >> x;
+
+	switch (x) {
+	case('y' || 'Y') :
+	{
+		ShowLib(lib, size);
+		break;
+	}
+	default: break;
+	}
+}
+
+book *menu2(book *lib, int size) {
+
+	system("cls");
+	cout << "           Ввод завершен." << endl;
+	cout << "-----------------------------------" << endl;
+	cout << "1) Соxранить библиотеку." << endl;
+	cout << "2) Загрузить библиотеку." << endl;
+	cout << "3) Вывести на экран. " << endl;
+	cout << "4) Сортировать." << endl;
+	cout << "5) Выход." << endl;
+
+	char response[10];
+	int n = 1;
+	while (n) {
+
+		cin.ignore(cin.rdbuf()->in_avail());
+		cin >> response;
+
+		if (strcmp(response, "1") == 0) {
+			OutputToFile(lib, size);
+			break;
+		}
+		if (strcmp(response, "2") == 0) {
+			lib = load(lib, size);
+			continue;
+		}
+		if (strcmp(response, "3") == 0) {
+			ShowLib(lib, size);
+			break;
+		}
+		if (strcmp(response, "4") == 0) {
+			menu_sort(lib, size);
+			continue;
+		}
+		if (strcmp(response, "5") == 0) {
+			return 0;
+		}
+		system("cls");
+
+
+		cout << "           Ввод завершен." << endl;
+		cout << "-----------------------------------" << endl;
+		cout << "1) Соxранить библиотеку." << endl;
+		cout << "2) Вывести на экран. " << endl;
+		cout << "3) Сортировать." << endl;
+		cout << "4) Выход." << endl;
+		cout << "Неизвестная команда. Повторите ввод: " << endl;
+	}
+}
+
+book *create(book *lib, int &size) {
+
+	int n = 1;
+	while (n) {
+		lib = AddBook(lib, size);
+		if (strcmp(lib[size - 1].author, "") == 0) {
+			lib = DelBook(lib, size, size - 1);
+			break;
+		}
+	}
+	if (lib == NULL) {
+		system("cls");
+		cout << "Библиотека пуста." << endl;
+		_getch();
+		return lib;
+	}
+	lib = menu2(lib, size);
+	return lib;
+}
+
+book *menu(book *lib, int &size) {
+	char response[10];
+	int n = 1;
+	while (n) {
+		system("cls");
+		cout << "1) Создать библиотеку." << endl;
+		cout << "2) Загрузить библиотеку. " << endl;
+		cout << "3) Выход." << endl;
+		if (strcmp(response, "invalid") == 0) {
+			cout << "Неверное значение. Повторите ввод." << endl;
+		}
+
+
+
+		cin.ignore(cin.rdbuf()->in_avail());
+		cin >> response;
+
+		if (strcmp(response, "1") == 0) {
+			lib = create(lib, size);
+			if (lib == NULL) {
+				continue;
+			}
+			break;
+		}
+		if (strcmp(response, "2") == 0) {
+			lib = load(lib, size);
+			cout << "1) Создать библиотеку." << endl;
+			cout << "2) Загрузить библиотеку. " << endl;
+			cout << "3) Выход." << endl;
+			continue;
 		}
 		if (strcmp(response, "3") == 0) {
 			cout << "Программа завершена." << endl;
 			return 0;
 		}
-		system("cls");
-		cout << "1) Создать библиотеку." << endl;
-		cout << "2) Загрузить библиотеку. " << endl;
-		cout << "Неизвестная команда. Повторите ввод: " << endl;
-
+		strcpy_s(response, "invalid");
 	}
-
-
 	return lib;
 }
 
 int main() {
 	Cyrillic();
-
-	book b;
 	book *lib = NULL;
 	int size = 0;
 	lib = menu(lib, size);
@@ -426,8 +562,6 @@ int main() {
 		return 0;
 	}
 
-	ShowLib(lib, size);
-	_getch();
 
 	delete[] lib;
 	return 0;

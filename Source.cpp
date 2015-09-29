@@ -10,11 +10,6 @@
 using namespace std;
 
 
-void Cyrillic() {
-	SetConsoleCP(1251);
-	SetConsoleOutputCP(1251);
-}
-
 struct book
 {
 	char author[40];
@@ -22,6 +17,11 @@ struct book
 	int year;
 	int pages;
 };
+
+void Cyrillic() {
+	SetConsoleCP(1251);
+	SetConsoleOutputCP(1251);
+}
 
 book GetBook() {
 	book x;
@@ -38,10 +38,36 @@ book GetBook() {
 
 	cout << "Введите название книги: ";
 	cin.getline(x.title, 40);
-	cout << "Введите год издния: ";
-	cin >> x.year;
-	cout << "Введите кол-во страниц: ";
-	cin >> x.pages;
+
+	while (1)
+	{
+		cout << "Введите год издния: ";
+		cin >> x.year;
+		if(cin.fail()){
+			cin.clear();
+			cin.ignore(cin.rdbuf()->in_avail());
+			cout << "--------------------------------------" << endl;
+			cout << "      ***Некорректный ввод***" << endl;
+			cout << "--------------------------------------" << endl;
+			continue;
+		}
+		break;
+	}
+
+	while (1)
+	{
+		cout << "Введите кол-во страниц: ";
+		cin >> x.pages;
+		if (cin.fail()) {
+			cin.clear();
+			cin.ignore(cin.rdbuf()->in_avail());
+			cout << "--------------------------------------" << endl;
+			cout << "      ***Некорректный ввод***" << endl;
+			cout << "--------------------------------------" << endl;
+			continue;
+		}
+		break;
+	}
 
 	return x;
 }
